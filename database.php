@@ -92,7 +92,6 @@ class Database
         mysqli_close($this->conn);
     }
 
-    // return "where" string from array
     public function where_clause($data){
 
       if(!isset($data)) {
@@ -107,7 +106,7 @@ class Database
               if (!in_array($value[1], $this->sql_where_clauses)) {
                   return;
               } else {
-                  $value[0] = " `" . $value[0] . "` ";
+                  $value[0] = " `".$this->table_name."`.`" . $value[0] . "` ";
                   $value[2] = is_numeric($value[2]) ? $value[2] : "'" . $value[2] . "'";
                   $where_values[] = implode(' ', $value);
               }
@@ -198,7 +197,6 @@ class Database
         }
 
         $results = $this->query($query);
-
 
         return $results ? $this->fetch($results) : [];
     }
