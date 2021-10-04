@@ -123,6 +123,29 @@ class Database
 
     }
 
+    public function search_clause($data,$where = true){
+        if (!isset($data)) {
+          return;
+        }
+
+        $query = "";
+
+        if ($where) {
+            $query .= "WHERE ";
+        }
+
+        foreach ($data as $key => $value) {
+            if (in_array($value[0], array_merge(array_keys($this->model_data), [$this->primary_key]))) {
+                $query .= $value[0]." LIKE '%".$value[1]."%' ";
+            }
+            if (isset($value[2]) && in_array($value[2], $this->sql_where_clauses)) {
+                $query .= $value[2]." ";
+            }
+        }
+
+        return $query;
+    }
+
     // return results
     public function get($data)
     {
@@ -169,20 +192,7 @@ class Database
 
         $query .= $this->where_clause($data['where']);
 
-
-        if (isset($data['search'])) {
-            if (!isset($data['where'])) {
-                $query .= "WHERE ";
-            };
-            foreach ($data['search'] as $key => $value) {
-                if (in_array($value[0], array_merge(array_keys($this->model_data), [$this->primary_key]))) {
-                    $query .= $value[0]." LIKE '%".$value[1]."%' ";
-                }
-                if (isset($value[2]) && in_array($value[2], $this->sql_where_clauses)) {
-                    $query .= $value[2]." ";
-                }
-            }
-        }
+        $query .= $this->search_clause($data['search'],!isset($data['where']));
 
         if (isset($data['order_by']) && isset($data['order'])) {
             $query .= " ORDER BY `".$this->table_name."`.`" . $data['order_by'] . "` " . $data['order'];
@@ -298,6 +308,7 @@ class Database
         $query = "SELECT COUNT(" . $this->primary_key . ") FROM `" . $this->table_name . "` ";
 
         $query .= $this->where_clause($data['where']);
+        $query .= $this->search_clause($data['search']);
 
         $results = $this->query($query);
 
