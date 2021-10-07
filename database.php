@@ -254,8 +254,7 @@ class Database
         $query = "UPDATE `" . $this->table_name . "` SET ";
 
         if (isset($data['values'])) {
-            $data['values'] = array_merge($this->fillable_data, $data['values']);
-
+            $data['values'] = $data['values'];
 
             $passed_keys = array_intersect(array_keys($this->model_data), array_keys($data['values']));
 
@@ -308,7 +307,8 @@ class Database
         $query = "SELECT COUNT(" . $this->primary_key . ") FROM `" . $this->table_name . "` ";
 
         $query .= $this->where_clause($data['where']);
-        $query .= $this->search_clause($data['search']);
+
+        $query .= $this->search_clause($data['search'],!isset($data['where']));
 
         $results = $this->query($query);
 
